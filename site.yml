@@ -66,3 +66,60 @@
         dest: ./kubeconfig
         flat: true
       when: ansible_hostname == hostvars[groups[group_name_master | default('master')][0]]['ansible_hostname']
+
+- name: Manage kubeconfig file for k3s cluster
+  hosts: master[0]
+  become: true
+  tasks:
+    - name: Temporarily change permissions to copy kubeconfig
+      ansible.builtin.shell:
+        cmd: "sudo chmod 777 /etc/rancher/k3s/k3s.yaml"
+      become: true
+
+    - name: Copy kubeconfig to local .kube directory
+      ansible.builtin.fetch:
+        src: "/etc/rancher/k3s/k3s.yaml"
+        dest: "~/.kube/config"
+        flat: true
+
+    - name: Revert permissions on kubeconfig
+      ansible.builtin.shell:
+        cmd: "sudo chmod 600 /etc/rancher/k3s/k3s.yaml"
+      become: true
+
+    - name: Update kubeconfig to point to the master IP
+      ansible.builtin.lineinfile:
+        path: "/home/ubuntu-template/.kube/config"
+        regexp: '    server: https://.*:6443'
+        line: '    server: https://192.168.68.60:6443'
+        backrefs: yes
+      delegate_to: localhost
+
+- name: Setup Helm and Kubernetes Repositories
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Download Helm command line tool
+      ansible.builtin.uri:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        return_content: true
+      register: helm_installer
+
+    - name: Install Helm
+      ansible.builtin.shell:
+        cmd: bash
+        stdin: "{{ helm_installer.content }}"
+        creates: /usr/local/bin/helm
+      environment:
+        DESIRED_VERSION: "{{ helm_version | default('') }}"
+
+- name: Rancher install
+  hosts: localhost
+  roles:
+   - rancher
+
+- name: Deploy Ceph CSI RBD on Kubernetes Masters
+  hosts: localhost
+  roles:
+    - ceph_csi_setup
+

@@ -1,0 +1,34 @@
+---
+- name: Ensure the Kubernetes Python library is installed
+  ansible.builtin.pip:
+    name: kubernetes
+
+- name: Add Ceph-csi Helm repository
+  kubernetes.core.helm_repository:
+    name: ceph-csi
+    repo_url: https://ceph.github.io/csi-charts
+
+- name: Create namespace ceph-csi-rbd
+  kubernetes.core.k8s:
+    name: ceph-csi-rbd
+    kind: Namespace
+    state: present
+
+- name: Update Helm repository cache
+  command: /usr/local/bin/helm repo update
+
+- name: Install Ceph-csi from Helm chart
+  kubernetes.core.helm:
+    name: ceph-csi-rbd
+    chart_ref: ceph-csi/ceph-csi-rbd
+    release_namespace: ceph-csi-rbd
+    state: present
+
+- name: Check rollout status of Ceph-csi deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: ceph-csi-rbd-provisioner
+    namespace: ceph-csi-rbd
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 120

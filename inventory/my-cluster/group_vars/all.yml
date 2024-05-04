@@ -99,6 +99,12 @@ metal_lb_controller_tag_version: "v0.14.3"
 # metallb ip range for load balancer
 metal_lb_ip_range: "192.168.68.61-192.168.68.63"
 
+
+traefik_internal_dash_dns_name: "traefik.lan"
+# second ip from metallb range for external traefik
+traefik_external_endpoint_ip: "192.168.68.62"
+traefik_external_dash_dns_name: "traefik.nicholstech.org"
+
 # Only enable if your nodes are proxmox LXC nodes, make sure to configure your proxmox nodes
 # in your hosts.ini file.
 # Please read https://gist.github.com/triangletodd/02f595cd4c0dc9aac5f7763ca2264185 before using this.
