@@ -29,6 +29,3 @@
     kind: Deployment
     name: ceph-csi-rbd-provisioner
     namespace: ceph-csi-rbd
-    wait: true
-    wait_sleep: 10
-    wait_timeout: 120
