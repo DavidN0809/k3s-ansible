@@ -3,11 +3,9 @@
   register: helm_repo_add_result
   ignore_errors: yes
 
-- name: Update Helm Repositories
-  command: helm repo update
-  when: helm_repo_add_result is succeeded
+- name: Update Helm repository cache
+  command: /usr/local/bin/helm repo update
 
 - name: Install GPU Operator
-  command: helm install --wait --generate-name -n gpu-operator --create-nam>
-  delegate_to: localhost
-
+  #command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false --set toolkit.enabled=false
+  command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator
