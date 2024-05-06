@@ -7,5 +7,6 @@
   command: /usr/local/bin/helm repo update
 
 - name: Install GPU Operator
-  #command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false --set toolkit.enabled=false
-  command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator
+  command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false --set toolkit.enabled=false
+# k3s requires driver on host
+  #command: helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator

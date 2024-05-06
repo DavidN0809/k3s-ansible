@@ -113,20 +113,21 @@
       environment:
         DESIRED_VERSION: "{{ helm_version | default('') }}"
 
-- name: Rancher install
-  hosts: localhost
-  roles:
-   - rancher
+#- name: Rancher install
+#  hosts: localhost
+#  roles:
+#   - rancher
 
 - name: Deploy Ceph CSI RBD on Kubernetes Masters
   hosts: localhost
   roles:
     - ceph_csi_setup
 
-#- name: Deploy Nvidia-drivers on Masters nodes
-#  hosts: master[2]
-#  roles:
-#    - nvidia-drivers
+# k3s requires drivers to be installed
+- name: Deploy Nvidia-drivers on Masters nodes
+  hosts: master[2]
+  roles:
+    - nvidia-drivers
 
 - name: Deploy Nvidia-operator on Kubernetes Masters
   hosts: localhost
