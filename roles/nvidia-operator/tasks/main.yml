@@ -1,0 +1,13 @@
+- name: Add NVIDIA Helm Repository
+  command: helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+  register: helm_repo_add_result
+  ignore_errors: yes
+
+- name: Update Helm Repositories
+  command: helm repo update
+  when: helm_repo_add_result is succeeded
+
+- name: Install GPU Operator
+  command: helm install --wait --generate-name -n gpu-operator --create-nam>
+  delegate_to: localhost
+

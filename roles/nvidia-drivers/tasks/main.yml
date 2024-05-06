@@ -1,0 +1,104 @@
+---
+- name: Update apt repositories
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: Install software-properties-common
+  become: yes
+  apt:
+    name: software-properties-common
+    state: present
+
+- name: Add graphics-drivers PPA
+  become: yes
+  apt_repository:
+    repo: ppa:graphics-drivers/ppa
+    state: present
+
+- name: Add NVIDIA CUDA Toolkit repository
+  become: yes
+  shell: |
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+  register: cuda_repo_added
+
+- name: Update apt repositories after adding CUDA Toolkit repo
+  become: yes
+  apt:
+    update_cache: yes
+  when: cuda_repo_added is succeeded
+
+- name: Install CUDA Toolkit
+  become: yes
+  apt:
+    name: cuda-toolkit-12-4
+    state: present
+
+- name: Install NVIDIA driver and utility packages
+  become: yes
+  apt:
+    name:
+      - nvidia-headless-550-server
+      - nvidia-settings
+      - nvidia-utils-550-server
+      - libnvidia-decode-550-server
+      - libnvidia-encode-550-server
+    state: present
+
+- name: Set CUDA environment variables
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: "{{ item }}"
+  loop:
+    - "export PATH=/usr/local/cuda/bin:$PATH"
+    - "export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+  when: cuda_repo_added is succeeded
+
+- name: source bashrc
+  shell: source /home/{{ ansible_user }}/.bashrc
+  args:
+     executable: /bin/bash
+  when: cuda_repo_added is succeeded
+
+- name: Add NVIDIA Container Toolkit repository key
+  become: yes
+  shell: >
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+      sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  register: add_repo_result
+  changed_when: "'OK' in add_repo_result.stdout"
+
+- name: Update apt repositories after adding NVIDIA Container Toolkit repo
+  become: yes
+  apt:
+    update_cache: yes
+  when: add_repo_result.changed
+
+- name: Install NVIDIA Container Toolkit
+  become: yes
+  apt:
+    name: nvidia-container-toolkit
+    state: present
+
+- name: Configure Docker to use the NVIDIA runtime
+  become: yes
+  command: sudo nvidia-ctk runtime configure --runtime=docker
+
+- name: Configure containerd to use the NVIDIA runtime
+  become: yes
+  command: sudo nvidia-ctk runtime configure --runtime=containerd
+
+- name: Restart containerd
+  systemd:
+    name: containerd
+    state: restarted
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+

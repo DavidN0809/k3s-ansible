@@ -123,3 +123,13 @@
   roles:
     - ceph_csi_setup
 
+- name: Deploy Nvidia-drivers on Masters nodes
+  hosts: master[2]
+  roles:
+    - nvidia-drivers
+
+- name: Deploy Nvidia-operator on Kubernetes Masters
+  hosts: localhost
+  roles:
+    - nvidia-operator
+
