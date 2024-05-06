@@ -4,9 +4,8 @@
 
 This playbook will build an HA Kubernetes cluster with `k3s`, `kube-vip` and MetalLB via `ansible`.
 
-## Copys kubeconfig does not change server IP
-## Rancher
-https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/install-upgrade-on-a-kubernetes-cluster
+### My mods
+Auto install rancher, ceph csi driver, nvidia drivers and nvidia gpu operator (master[2] is nvidia node)
 
 This is based on the work from [this fork](https://github.com/212850a/k3s-ansible) which is based on the work from [k3s-io/k3s-ansible](https://github.com/k3s-io/k3s-ansible). It uses [kube-vip](https://kube-vip.io/) to create a load balancer for control plane, and [metal-lb](https://metallb.universe.tf/installation/) for its service `LoadBalancer`.
 
