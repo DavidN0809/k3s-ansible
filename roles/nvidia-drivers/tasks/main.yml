@@ -19,8 +19,8 @@
 - name: Add NVIDIA CUDA Toolkit repository
   become: yes
   shell: |
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
-    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb < /dev/null
   register: cuda_repo_added
 
 - name: Update apt repositories after adding CUDA Toolkit repo
@@ -64,13 +64,18 @@
 
 - name: Add NVIDIA Container Toolkit repository key
   become: yes
-  shell: >
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-      sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-      sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  shell: |
+    set -e
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey -o gpgkey
+    sudo rm -f /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    sudo gpg --batch --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg gpgkey
+    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list -o nvidia-container-toolkit.list
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' nvidia-container-toolkit.list | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
   register: add_repo_result
   changed_when: "'OK' in add_repo_result.stdout"
+  ignore_errors: yes
+  async: 300
+  poll: 10
 
 - name: Update apt repositories after adding NVIDIA Container Toolkit repo
   become: yes
@@ -92,13 +97,13 @@
   become: yes
   command: sudo nvidia-ctk runtime configure --runtime=containerd
 
-- name: Restart containerd
-  systemd:
-    name: containerd
-    state: restarted
+#- name: Restart containerd
+#  systemd:
+#    name: containerd
+#    state: restarted
 
-- name: Restart Docker service
-  systemd:
-    name: docker
-    state: restarted
+#- name: Restart Docker service
+#  systemd:
+#    name: docker
+#    state: restarted
 

@@ -1,3 +1,0 @@
----
-helm_cache_directory: "{{ ansible_env.HOME }}/.cache/helm/repository/local"
-helm_config_directory: "{{ ansible_env.HOME }}/.config/helm"
