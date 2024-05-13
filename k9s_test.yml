@@ -1,0 +1,5 @@
+---
+- name: k9s test
+  hosts: localhost
+  roles:
+    - k9s

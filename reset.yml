@@ -1,4 +1,10 @@
 ---
+- name: Reset ansible vm
+  hosts: localhost
+  become: true
+  roles:
+    - role: reset-local
+      become: true
 - name: Reset k3s cluster
   hosts: k3s_cluster
   gather_facts: true

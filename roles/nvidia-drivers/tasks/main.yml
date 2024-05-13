@@ -86,7 +86,9 @@
 - name: Install NVIDIA Container Toolkit
   become: yes
   apt:
-    name: nvidia-container-toolkit
+    name:
+      - nvidia-container-toolkit
+      - nvidia-cuda-toolkit
     state: present
 
 - name: Configure Docker to use the NVIDIA runtime
@@ -96,6 +98,10 @@
 - name: Configure containerd to use the NVIDIA runtime
   become: yes
   command: sudo nvidia-ctk runtime configure --runtime=containerd
+
+- name: Reboot Node
+  become: yes
+  ansible.builtin.reboot:
 
 #- name: Restart containerd
 #  systemd:

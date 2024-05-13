@@ -1,0 +1,17 @@
+---
+# tasks file for reset-local
+
+- name: Uninstall Homebrew
+  ansible.builtin.shell: |
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+  ignore_errors: yes
+
+- name: Remove Helm directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.helm"
+    state: absent
+
+- name: Uninstall all Helm repositories
+  ansible.builtin.shell:
+    cmd: "helm repo remove $(helm repo list | awk '{print $1}' | tail -n +2)"
+  ignore_errors: true

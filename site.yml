@@ -112,6 +112,10 @@
         creates: /usr/local/bin/helm
       environment:
         DESIRED_VERSION: "{{ helm_version | default('') }}"
+- name: k9s and brew install
+  hosts: localhost
+  roles:
+    - k9s
 
 #- name: Rancher install
 #  hosts: localhost
@@ -133,4 +137,3 @@
   hosts: localhost
   roles:
     - nvidia-operator
-
