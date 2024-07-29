@@ -128,12 +128,12 @@
     - ceph_csi_setup
 
 # k3s requires drivers to be installed
-- name: Deploy Nvidia-drivers on Masters nodes
-  hosts: master[2]
-  roles:
-    - nvidia-drivers
+#- name: Deploy Nvidia-drivers on Masters nodes
+#  hosts: master[2]
+#  roles:
+#    - nvidia-drivers
 
-- name: Deploy Nvidia-operator on Kubernetes Masters
-  hosts: localhost
-  roles:
-    - nvidia-operator
+#- name: Deploy Nvidia-operator on Kubernetes Masters
+#  hosts: localhost
+#  roles:
+#    - nvidia-operator
