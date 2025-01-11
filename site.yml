@@ -91,7 +91,7 @@
       ansible.builtin.lineinfile:
         path: "/home/ubuntu-template/.kube/config"
         regexp: '    server: https://.*:6443'
-        line: '    server: https://192.168.68.60:6443'
+        line: '    server: https://192.168.68.39:6443'
         backrefs: yes
       delegate_to: localhost
 
@@ -128,12 +128,12 @@
     - ceph_csi_setup
 
 # k3s requires drivers to be installed
-#- name: Deploy Nvidia-drivers on Masters nodes
-#  hosts: master[2]
-#  roles:
-#    - nvidia-drivers
+- name: Deploy Nvidia-drivers on Masters nodes
+  hosts: master[2]
+  roles:
+    - nvidia-drivers
 
-#- name: Deploy Nvidia-operator on Kubernetes Masters
-#  hosts: localhost
-#  roles:
-#    - nvidia-operator
+- name: Deploy Nvidia-operator on Kubernetes Masters
+  hosts: localhost
+  roles:
+    - nvidia-operator
